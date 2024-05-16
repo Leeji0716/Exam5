@@ -53,4 +53,8 @@ public class NotebookService {
 
         notebookRepository.save(notebook);
     }
+
+    public List<Notebook> getNotebookListByKeyword(String keyword) {
+        return notebookRepository.findByNameContaining(keyword);
+    }
 }

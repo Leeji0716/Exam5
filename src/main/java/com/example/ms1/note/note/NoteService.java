@@ -38,4 +38,15 @@ public class NoteService {
         noteRepository.deleteById(id);
     }
 
+    public List<Note> getNoteListByKeyword(String keyword) {
+        return noteRepository.findByTitleContaining(keyword);
+    }
+
+    public List<Note> getSortedNoteListByCreateDate(Notebook targetNotebook) {
+        return noteRepository.findByNotebookOrderByCreateDateDesc(targetNotebook);
+    }
+
+    public List<Note> getSortedNoteListBytitle(Notebook targetNotebook) {
+        return noteRepository.findByNotebookOrderByTitle(targetNotebook);
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.ms1.note.notebook;
 
 import com.example.ms1.note.MainService;
+import com.example.ms1.note.ParamHandler;
 import com.example.ms1.note.note.Note;
 import com.example.ms1.note.note.NoteService;
 import lombok.RequiredArgsConstructor;
@@ -17,47 +18,48 @@ public class NotebookController {
     private final MainService mainService;
 
     @PostMapping("/books/write")
-    public String write() {
+    public String write(ParamHandler paramHandler) {
         Notebook notebook = mainService.saveDefaultNotebook();
-        return "redirect:/books/%d".formatted(notebook.getId());
+        return paramHandler.getRedirectUrl("/books/%d".formatted(notebook.getId()));
 
     }
 
     @PostMapping("/groups/{notebookId}/books/write")
-    public String groupWrite(@PathVariable("notebookId") Long notebookId) {
+    public String groupWrite(@PathVariable("notebookId") Long notebookId, ParamHandler paramHandler) {
         Notebook notebook = mainService.saveGroupNotebook(notebookId);
-        return "redirect:/books/%d".formatted(notebook.getId());
+
+        return paramHandler.getRedirectUrl("/books/%d".formatted(notebook.getId()));
     }
 
     @GetMapping("/books/{id}")
-    public String detail(@PathVariable("id") Long id) {
+    public String detail(@PathVariable("id") Long id, ParamHandler paramHandler) {
         Notebook notebook = notebookService.getNotebook(id);
         Note note = notebook.getNoteList().get(0);
 
-        return "redirect:/books/%d/notes/%d".formatted(id, note.getId());
+        return paramHandler.getRedirectUrl("/books/%d/notes/%d".formatted(id, note.getId()));
     }
 
     @GetMapping("/books/{id}/delete")
-    public String delete(@PathVariable("id") Long id) {
+    public String delete(@PathVariable("id") Long id, ParamHandler paramHandler) {
         Notebook notebook = notebookService.getNotebook(id);
         notebookService.delete(notebook);
 
-        return "redirect:/";
+        return paramHandler.getRedirectUrl("/");
     }
 
     @PostMapping("/books/{id}/update")
-    public String update(@PathVariable("id") Long id, String name) {
+    public String update(@PathVariable("id") Long id, String name, ParamHandler paramHandler) {
         Notebook notebook = notebookService.getNotebook(id);
         notebookService.update(notebook, name);
 
-        return "redirect:/books/%d".formatted(id);
+        return paramHandler.getRedirectUrl("/books/%d".formatted(id));
     }
 
     @PostMapping("/books/{id}/move")
-    public String move(@PathVariable("id") Long id, Long moveTarget) {
+    public String move(@PathVariable("id") Long id, Long moveTarget, ParamHandler paramHandler) {
         Notebook notebook = notebookService.getNotebook(id);
         notebookService.move(id, moveTarget);
 
-        return "redirect:/books/%d".formatted(id);
+        return paramHandler.getRedirectUrl("/books/%d".formatted(id));
     }
 }
