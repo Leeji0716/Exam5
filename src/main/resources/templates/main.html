@@ -1,20 +1,28 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css"/>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 </head>
 <body>
 <div class="bg-yellow-400"
-th:with="notebookList=${mainDataDto.notebookList},
+     th:with="notebookList=${mainDataDto.notebookList},
         noteList=${mainDataDto.noteList},
         targetNotebook=${mainDataDto.targetNotebook},
         targetNote=${mainDataDto.targetNote}">
     <div class="bg-blue-300">
         <a href="/">logo</a>
     </div>
+
+    <div class="bg-blue-300">
+        <a href="/signup" class="btn">회원가입</a>
+        <a class="btn" sec:authorize="isAuthenticated()" th:href="@{/logout}">로그아웃</a>
+    </div>
+
     <div class="bg-red-600 flex">
         <div class="bg-indigo-300 w-[20%]">
             <ul class="menu h-[100%] overflow-scroll">
@@ -50,6 +58,23 @@ th:with="notebookList=${mainDataDto.notebookList},
             <form th:action="@{|/groups/${targetNotebook.id}/books/write|}" method="post">
                 <input type="submit" value="하위 노트북 추가">
             </form>
+
+            <a th:href="@{|/books/${targetNotebook.id}/delete|}" class="btn">삭제</a>
+
+            <label for="renameNotebook" class="btn">노트북 이름 변경</label>
+            <input type="checkbox" id="renameNotebook" class="modal-toggle" />
+            <div class="modal" role="dialog">
+                <div class="modal-box">
+                    <form th:action="@{|/books/${targetNotebook.id}/update|}" method="post">
+                        <input type="text" class="input" name="name" th:placeholder="${targetNotebook.name}">
+                        <input type="submit" th:value="변경" class="btn">
+                    </form>
+                    <div class="modal-action">
+                        <label for="renameNotebook" class="btn">Close!</label>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div class="bg-red-300 w-[20%] h-[800px] text-center ">
             <ul class="h-[100%] overflow-scroll">
@@ -73,7 +98,7 @@ th:with="notebookList=${mainDataDto.notebookList},
                     <input type="text" name="title" th:value="${targetNote.title}">
                 </div>
                 <div>
-                    <textarea name="content" cols="30" rows="10" th:text="${targetNote.content}"></textarea>
+                    <textarea id="content" name="content" cols="30" rows="10" th:text="${targetNote.content}"></textarea>
                 </div>
                 <div>
                     <input type="button" value="수정" onclick="updateForm()">
@@ -87,6 +112,9 @@ th:with="notebookList=${mainDataDto.notebookList},
     </div>
 </div>
 </body>
+<script>
+    var simplemde = new SimpleMDE({element:document.getElementById("content")});
+</script>
 <script>
     function updateForm() {
         const form = document.getElementById("updateForm");
