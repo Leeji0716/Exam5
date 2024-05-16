@@ -19,7 +19,8 @@ public class MainService {
     private final NoteService noteService;
 
     public MainDataDto getDefaultMainData() {
-        List<Notebook> notebookList = notebookService.getNotebookList();
+//        List<Notebook> notebookList = notebookService.getNotebookList();
+        List<Notebook> notebookList = notebookService.getTopNotebookList();
 
         if (notebookList.isEmpty()) {
             Notebook notebook = this.saveDefaultNotebook();
@@ -65,12 +66,12 @@ public class MainService {
         return notebookService.save(notebook);
     }
 
-    public void saveGroupNotebook(Long notebookId) {
+    public Notebook saveGroupNotebook(Long notebookId) {
         Notebook parent = this.getNotebook(notebookId);
         Notebook child = this.saveDefaultNotebook();
         parent.addChild(child);
 
-        notebookService.save(parent);
+        return notebookService.save(parent);
     }
 
     public Notebook addToNotebook(Long notebookId) {

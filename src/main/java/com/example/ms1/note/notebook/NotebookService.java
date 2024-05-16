@@ -4,6 +4,7 @@ import com.example.ms1.note.note.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +30,27 @@ public class NotebookService {
 
     public void update(Notebook notebook, String name) {
         notebook.setName(name);
+        notebookRepository.save(notebook);
+    }
+
+    public List<Notebook> getTopNotebookList() {
+        List<Notebook> notebookList = notebookRepository.findAll();
+        List<Notebook> topNotebookList = new ArrayList<>();
+
+        for(Notebook notebook : notebookList){
+            if (notebook.getParent() == null){
+                topNotebookList.add(notebook);
+            }
+        }
+        return topNotebookList;
+    }
+
+    public void move(Long id, Long moveTarget) {
+        Notebook notebook = getNotebook(id);
+        Notebook targetNotebook = getNotebook(moveTarget);
+
+        notebook.setParent(targetNotebook);
+
         notebookRepository.save(notebook);
     }
 }

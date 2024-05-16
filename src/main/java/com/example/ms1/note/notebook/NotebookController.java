@@ -18,16 +18,15 @@ public class NotebookController {
 
     @PostMapping("/books/write")
     public String write() {
-        mainService.saveDefaultNotebook();
-        return "redirect:/";
+        Notebook notebook = mainService.saveDefaultNotebook();
+        return "redirect:/books/%d".formatted(notebook.getId());
 
     }
 
     @PostMapping("/groups/{notebookId}/books/write")
     public String groupWrite(@PathVariable("notebookId") Long notebookId) {
-
-        mainService.saveGroupNotebook(notebookId);
-        return "redirect:/";
+        Notebook notebook = mainService.saveGroupNotebook(notebookId);
+        return "redirect:/books/%d".formatted(notebook.getId());
     }
 
     @GetMapping("/books/{id}")
@@ -50,6 +49,14 @@ public class NotebookController {
     public String update(@PathVariable("id") Long id, String name) {
         Notebook notebook = notebookService.getNotebook(id);
         notebookService.update(notebook, name);
+
+        return "redirect:/books/%d".formatted(id);
+    }
+
+    @PostMapping("/books/{id}/move")
+    public String move(@PathVariable("id") Long id, Long moveTarget) {
+        Notebook notebook = notebookService.getNotebook(id);
+        notebookService.move(id, moveTarget);
 
         return "redirect:/books/%d".formatted(id);
     }

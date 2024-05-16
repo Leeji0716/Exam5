@@ -7,8 +7,53 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script src="https://kit.fontawesome.com/4c7ae19c08.js" crossorigin="anonymous"></script>
 </head>
 <body>
+<li th:fragment="noteTree(notebookList, targetNotebook)" th:each="notebook : ${notebookList}"
+    th:with="basic='w-[90%] p-[10px]'">
+    <th:block th:if="${!#lists.isEmpty(notebook.children)}">
+        <details open>
+            <summary class="flex p-0"><a th:class="${basic}"
+                                         th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-600':''"
+                                         th:href="@{|/books/${notebook.id}|}"
+                                         th:text="${notebook.name}"></a></summary>
+            <ul>
+                <li th:replace="main::noteTree(${notebook.children}, ${targetNotebook})"></li>
+            </ul>
+        </details>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(notebook.children)}">
+        <a th:class="${basic}"
+           th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-600' : '' "
+           th:href="@{|/books/${notebook.id}|}" th:text="${notebook.name}"></a>
+    </th:block>
+</li>
+
+<li th:fragment="moveTree(notebookList, targetNotebook)" th:each="notebook : ${notebookList}"
+    th:with="basic='w-[90%] p-[10px]'">
+    <th:block th:if="${!#lists.isEmpty(notebook.children)}">
+        <details open th:if="${notebook.id != targetNotebook.id and !#lists.contains(notebook.children, targetNotebook)}">
+            <summary class="flex p-0">
+                <div class="flex">
+                    <input type="radio" name="moveTarget" th:value="${notebook.id}" class="radio" checked />
+                    <a th:class="${basic}" href="javascript:void(0)" th:text="${notebook.name}"></a>
+                </div>
+            </summary>
+            <ul>
+                <li th:replace="main::moveTree(${notebook.children}, ${targetNotebook})"></li>
+            </ul>
+        </details>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(notebook.children)}">
+        <div th:if="${notebook.id != targetNotebook.id and !#lists.contains(notebook.children, targetNotebook)}">
+            <input type="radio" name="moveTarget" th:value="${notebook.id}" class="radio" />
+            <a th:class="${basic}"
+               href="javascript:void(0)" th:text="${notebook.name}"></a>
+        </div>
+    </th:block>
+</li>
+
 <div class="bg-yellow-400"
      th:with="notebookList=${mainDataDto.notebookList},
         noteList=${mainDataDto.noteList},
@@ -26,29 +71,7 @@
     <div class="bg-red-600 flex">
         <div class="bg-indigo-300 w-[20%]">
             <ul class="menu h-[100%] overflow-scroll">
-                <li th:each="notebook : ${notebookList}"
-                    th:with="basic='w-[90%] p-[10px]'">
-                    <th:block th:if="${!#lists.isEmpty(notebook.children)}">
-                        <details open>
-                            <summary class="flex p-0"><a th:class="${basic}"
-                                                         th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-600':''"
-                                                         th:href="@{|/books/${notebook.id}|}"
-                                                         th:text="${notebook.name}"></a></summary>
-                            <ul>
-                                <li th:each="child : ${notebook.children}">
-                                    <a th:class="${basic}"
-                                       th:classappend="${child.id == targetNotebook.id} ? 'bg-blue-600' : '' "
-                                       th:href="@{|/books/${child.id}|}" th:text="${child.name}"></a>
-                                </li>
-                            </ul>
-                        </details>
-                    </th:block>
-                    <th:block th:if="${#lists.isEmpty(notebook.children) and notebook.parent == null}">
-                        <a th:class="${basic}"
-                           th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-600' : '' "
-                           th:href="@{|/books/${notebook.id}|}" th:text="${notebook.name}"></a>
-                    </th:block>
-                </li>
+                <li th:replace="main::noteTree(${notebookList}, ${targetNotebook})"></li>
             </ul>
 
             <form th:action="@{|/books/write|}" method="post">
@@ -67,10 +90,26 @@
                 <div class="modal-box">
                     <form th:action="@{|/books/${targetNotebook.id}/update|}" method="post">
                         <input type="text" class="input" name="name" th:placeholder="${targetNotebook.name}">
-                        <input type="submit" th:value="변경" class="btn">
+                        <input type="submit" value="변경" class="btn">
                     </form>
                     <div class="modal-action">
                         <label for="renameNotebook" class="btn">Close!</label>
+                    </div>
+                </div>
+            </div>
+
+            <label for="moveNotebook" class="btn">노트북 이동</label>
+            <input type="checkbox" id="moveNotebook" class="modal-toggle" />
+            <div class="modal " role="dialog">
+                <div class="modal-box h-[700px]">
+                    <form th:action="@{|/books/${targetNotebook.id}/move|}" method="post" class="h-[90%]">
+                        <ul class="menu h-[80%] overflow-scroll">
+                            <li th:replace="main::moveTree(${notebookList}, ${targetNotebook})"></li>
+                        </ul>
+                        <input type="submit" value="이동" class="btn h-[10%]">
+                    </form>
+                    <div class="modal-action h-[10%]">
+                        <label for="moveNotebook" class="btn">Close!</label>
                     </div>
                 </div>
             </div>
